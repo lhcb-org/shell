@@ -261,6 +261,26 @@ func (sh *Shell) Chdir(dir string) error {
 	return resp.err
 }
 
+// Clearenv deletes all environment variables.
+func (sh *Shell) Clearenv() {
+	envs := sh.Environ()
+	clear := make([]string, 0, len(envs))
+	for _, val := range envs {
+		toks := strings.SplitN(val, "=", 2)
+		key := toks[0]
+		clear = append(
+			clear,
+			fmt.Sprintf("unset %s;", key),
+		)
+	}
+	err := sh.send(strings.Join(clear, ""))
+	if err != nil {
+		return
+	}
+
+	<-sh.resp
+}
+
 // Environ returns a copy of strings representing the environment, in the
 // form "key=value".
 func (sh *Shell) Environ() []string {
