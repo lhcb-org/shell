@@ -383,6 +383,15 @@ func TestEnviron(t *testing.T) {
 		t.Fatalf(err.Error())
 	}
 
+	orig_env := os.Environ()
+	defer func() {
+		for _, val := range orig_env {
+			toks := strings.SplitN(val, "=", 2)
+			k := toks[0]
+			v := toks[1]
+			os.Setenv(k, v)
+		}
+	}()
 	os.Clearenv()
 
 	sh, err := shell.New()
