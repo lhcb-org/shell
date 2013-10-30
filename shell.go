@@ -253,12 +253,31 @@ func (sh *Shell) send(cmd string) error {
 // Chdir changes the current working directory to the named directory. If
 // there is an error, it will be of type *PathError.
 func (sh *Shell) Chdir(dir string) error {
-	err := sh.send(fmt.Sprintf("cd %q"))
+	err := sh.send(fmt.Sprintf("cd %q", dir))
 	if err != nil {
 		return err
 	}
 	resp := <-sh.resp
 	return resp.err
+}
+
+// Environ returns a copy of strings representing the environment, in the
+// form "key=value".
+func (sh *Shell) Environ() []string {
+	panic("not implemented")
+	return nil
+}
+
+// Getwd returns a rooted path name corresponding to the current directory.
+// If the current directory can be reached via multiple paths (due to
+// symbolic links), Getwd may return any one of them.
+func (sh *Shell) Getwd() (pwd string, err error) {
+	err = sh.send("pwd")
+	if err != nil {
+		return "", err
+	}
+	resp := <-sh.resp
+	return string(bytes.Trim(resp.buf, "\n")), resp.err
 }
 
 // EOF
