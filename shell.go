@@ -264,8 +264,20 @@ func (sh *Shell) Chdir(dir string) error {
 // Environ returns a copy of strings representing the environment, in the
 // form "key=value".
 func (sh *Shell) Environ() []string {
-	panic("not implemented")
-	return nil
+	err := sh.send("/usr/bin/printenv")
+	if err != nil {
+		return nil
+	}
+	resp := <-sh.resp
+	if resp.err != nil {
+		return nil
+	}
+	blines := bytes.Split(bytes.Trim(resp.buf, "\n"), []byte("\n"))
+	envs := make([]string, 0, len(blines))
+	for _, bline := range blines {
+		envs = append(envs, string(bline))
+	}
+	return envs
 }
 
 // Getwd returns a rooted path name corresponding to the current directory.
