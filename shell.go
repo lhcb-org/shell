@@ -43,7 +43,7 @@ type Shell struct {
 }
 
 type response struct {
-	i   int    // command index
+	id  int    // command index
 	buf []byte // message payload
 	err error  // error
 }
@@ -161,7 +161,7 @@ func New() (Shell, error) {
 					}
 				}
 				fprintf(os.Stderr, "%d: <<< [%q] (err=%v)\n", i, string(buf), err)
-				sh.resp <- response{i, buf, err}
+				sh.resp <- response{id:i, buf:buf, err:err}
 			}
 		}
 	}(&sh)
@@ -179,25 +179,13 @@ func New() (Shell, error) {
 
 func (sh *Shell) Setenv(key, value string) error {
 	// fprintf(os.Stderr, ":: env[%q]= %q\n", key, value)
-	err := sh.send(fmt.Sprintf("export %s=%q", key, value))
-	// fprintf(os.Stderr, ":: env[%q]= %q [done]\n", key, value)
-	resp := <-sh.resp
-	if err != nil {
-		return err
-	}
-	if resp.err != nil {
-		err = resp.err
-	}
-	return err
+	resp := sh.send(fmt.Sprintf("export %s=%q", key, value))
+	return resp.err
 }
 
 func (sh *Shell) Getenv(key string) string {
 	// fprintf(os.Stderr, ":: env[%q]\n", key)
-	err := sh.send(fmt.Sprintf("echo ${%s}", key))
-	if err != nil {
-		return ""
-	}
-	resp := <-sh.resp
+	resp := sh.send(fmt.Sprintf("echo ${%s}", key))
 	if resp.err != nil {
 		return ""
 	}
@@ -209,30 +197,14 @@ func (sh *Shell) Getenv(key string) string {
 
 func (sh *Shell) Source(script string, args ...string) error {
 	// fprintf(os.Stderr, ":: source[%q]\n", script)
-	err := sh.send(fmt.Sprintf(". %s %s", script, strings.Join(args, " ")))
-	// fprintf(os.Stderr, "source::: %v\n", cmd)
-	if err != nil {
-		return err
-	}
-	resp := <-sh.resp
-	if resp.err != nil {
-		return resp.err
-	}
-
-	// fprintf(os.Stderr, ":: source[%q] [done]\n", script)
-	return err
+	resp := sh.send(fmt.Sprintf(". %s %s", script, strings.Join(args, " ")))
+	return resp.err
 }
 
 func (sh *Shell) Run(cmd string, args ...string) ([]byte, error) {
 	shcmd := strings.Join(append([]string{cmd}, args...), " ")
-	err := sh.send(shcmd)
-	if err != nil {
-		return nil, err
-	}
-	resp := <-sh.resp
-	err = resp.err
-
-	fprintf(os.Stderr, ":: run %q... [done]\n", shcmd)
+	resp := sh.send(shcmd)
+	// fprintf(os.Stderr, ":: run %q... [done]\n", shcmd)
 	return resp.buf, resp.err
 }
 
@@ -242,22 +214,22 @@ func (sh *Shell) Delete() error {
 	return nil
 }
 
-func (sh *Shell) send(cmd string) error {
+func (sh *Shell) send(cmd string) response {
 	i := sh.id()
 	req := fmt.Sprintf("%s\n%s\n", cmd, gosh_feed(i))
 	fprintf(os.Stderr, "%03d >>> %q\n", i, req)
 	_, err := sh.stdin.Write([]byte(req))
-	return err
+	if err != nil {
+		return response{id: i, buf: nil, err: err}
+	}
+	resp := <- sh.resp
+	return resp
 }
 
 // Chdir changes the current working directory to the named directory. If
 // there is an error, it will be of type *PathError.
 func (sh *Shell) Chdir(dir string) error {
-	err := sh.send(fmt.Sprintf("cd %q", dir))
-	if err != nil {
-		return err
-	}
-	resp := <-sh.resp
+	resp := sh.send(fmt.Sprintf("cd %q", dir))
 	return resp.err
 }
 
@@ -273,22 +245,16 @@ func (sh *Shell) Clearenv() {
 			fmt.Sprintf("unset %s;", key),
 		)
 	}
-	err := sh.send(strings.Join(clear, ""))
-	if err != nil {
+	resp := sh.send(strings.Join(clear, ""))
+	if resp.err != nil {
 		return
 	}
-
-	<-sh.resp
 }
 
 // Environ returns a copy of strings representing the environment, in the
 // form "key=value".
 func (sh *Shell) Environ() []string {
-	err := sh.send("/usr/bin/printenv")
-	if err != nil {
-		return nil
-	}
-	resp := <-sh.resp
+	resp := sh.send("/usr/bin/printenv")
 	if resp.err != nil {
 		return nil
 	}
@@ -304,11 +270,10 @@ func (sh *Shell) Environ() []string {
 // If the current directory can be reached via multiple paths (due to
 // symbolic links), Getwd may return any one of them.
 func (sh *Shell) Getwd() (pwd string, err error) {
-	err = sh.send("pwd")
-	if err != nil {
-		return "", err
+	resp := sh.send("pwd")
+	if resp.err != nil {
+		return "", resp.err
 	}
-	resp := <-sh.resp
 	return string(bytes.Trim(resp.buf, "\n")), resp.err
 }
 
