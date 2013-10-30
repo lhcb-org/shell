@@ -424,4 +424,56 @@ func TestEnviron(t *testing.T) {
 
 }
 
+func TestClearenv(t *testing.T) {
+
+	top, err := ioutil.TempDir("", "test-shell-")
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+	defer os.RemoveAll(top)
+
+	err = os.Chdir(top)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	sh, err := shell.New()
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+	defer sh.Delete()
+
+	ref_envs := sh.Environ()
+	sort.Strings(ref_envs)
+
+	sh.Clearenv()
+
+	envs := sh.Environ()
+	sort.Strings(envs)
+
+	env := make(map[string]string, len(envs))
+	keys := make([]string, 0, len(envs))
+	for _, val := range envs {
+		toks := strings.SplitN(val, "=", 2)
+		k := toks[0]
+		v := toks[1]
+		env[k] = v
+		keys = append(keys, k)
+	}
+	ref_keys := []string{
+		"_",
+	}
+	if len(keys) != len(ref_keys) {
+		t.Fatalf("expected clean environment (%v). got: %v\n", ref_keys, env)
+	}
+	if len(keys) == len(ref_envs) {
+		t.Fatalf(
+			"sh.Cleanenv does nothing (before keys=%d, after keys=%d)\n",
+			len(keys),
+			len(ref_envs),
+		)
+	}
+
+}
+
 // EOF
