@@ -161,7 +161,7 @@ func New() (Shell, error) {
 					}
 				}
 				fprintf(os.Stderr, "%d: <<< [%q] (err=%v)\n", i, string(buf), err)
-				sh.resp <- response{id:i, buf:buf, err:err}
+				sh.resp <- response{id: i, buf: buf, err: err}
 			}
 		}
 	}(&sh)
@@ -222,7 +222,7 @@ func (sh *Shell) send(cmd string) response {
 	if err != nil {
 		return response{id: i, buf: nil, err: err}
 	}
-	resp := <- sh.resp
+	resp := <-sh.resp
 	return resp
 }
 
