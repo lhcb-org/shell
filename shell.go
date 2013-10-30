@@ -79,9 +79,9 @@ func New() (Shell, error) {
 		for {
 			select {
 			case <-sh.quit:
-				fmt.Fprintf(os.Stderr, "quit...\n")
+				fprintf(os.Stderr, "quit...\n")
 				err := sh.cmd.Process.Kill()
-				fmt.Fprintf(os.Stderr, "quit...: %v\n", err)
+				fprintf(os.Stderr, "quit...: %v\n", err)
 				return
 
 			case i := <-sh.icmd:
