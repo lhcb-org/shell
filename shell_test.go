@@ -4,6 +4,8 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"sort"
+	"strings"
 	"testing"
 
 	"github.com/atlas-org/shell"
@@ -364,6 +366,51 @@ exit 101
 	out_exp := []byte("101\n1234\n4321\n")
 	if string(out) != string(out_exp) {
 		t.Fatalf("expected run-output=%q. got: %q\n", out_exp, out)
+	}
+
+}
+
+func TestEnviron(t *testing.T) {
+
+	top, err := ioutil.TempDir("", "test-shell-")
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+	defer os.RemoveAll(top)
+
+	err = os.Chdir(top)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	os.Clearenv()
+
+	sh, err := shell.New()
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+	defer sh.Delete()
+
+	envs := sh.Environ()
+	sort.Strings(envs)
+
+	env := make(map[string]string, len(envs))
+	keys := make([]string, 0, len(envs))
+	for _, val := range envs {
+		toks := strings.SplitN(val, "=", 2)
+		k := toks[0]
+		v := toks[1]
+		env[k] = v
+		keys = append(keys, k)
+	}
+	ref_keys := []string{
+		"PWD",
+		"_",
+		"TERM",
+		"SHLVL",
+	}
+	if len(keys) != len(ref_keys) {
+		t.Fatalf("expected clean environment (%v). got: %v\n", ref_keys, env)
 	}
 
 }
