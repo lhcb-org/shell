@@ -207,9 +207,9 @@ func (sh *Shell) Getenv(key string) string {
 	return out
 }
 
-func (sh *Shell) Source(script string) error {
+func (sh *Shell) Source(script string, args ...string) error {
 	// fprintf(os.Stderr, ":: source[%q]\n", script)
-	err := sh.send(fmt.Sprintf(". %s", script))
+	err := sh.send(fmt.Sprintf(". %s %s", script, strings.Join(args, " ")))
 	// fprintf(os.Stderr, "source::: %v\n", cmd)
 	if err != nil {
 		return err
