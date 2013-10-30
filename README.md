@@ -42,7 +42,7 @@ func main() {
 	}
 
     foo := sh.Getenv("FOO")
-	fmt.Fprintf(os.Stdout, "FOO=%q\n", foo)
+	fmt.Printf("FOO=%q\n", foo)
 	assert("666", foo)
 
 	err = sh.Setenv("FOO", "42")
@@ -51,11 +51,11 @@ func main() {
 	}
     
     foo = sh.Getenv("FOO")
-	fmt.Fprintf(os.Stdout, "FOO=%q\n", foo)
+	fmt.Printf("FOO=%q\n", foo)
 	assert("42", foo)
 
 	not := sh.Getenv("__NOT_THERE__")
-	fmt.Fprintf(os.Stdout, "__NOT_THERE__=%q\n", not)
+	fmt.Printf("__NOT_THERE__=%q\n", not)
 	assert("", not)
 
     err = sh.Source("./test-script.sh")
