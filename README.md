@@ -36,46 +36,34 @@ func main() {
 
 	fmt.Printf(">>> starting shell...\n")
 
-	err = sh.Setenv("TOTO", "101")
+	err = sh.Setenv("FOO", "666")
 	if err != nil {
 		panic(err)
 	}
-	err = sh.Setenv("TOTO", "1011")
+
+    foo := sh.Getenv("FOO")
+	fmt.Fprintf(os.Stdout, "FOO=%q\n", foo)
+	assert("666", foo)
+
+	err = sh.Setenv("FOO", "42")
 	if err != nil {
 		panic(err)
 	}
-	err = sh.Setenv("TOTO", "1012")
+    
+    foo = sh.Getenv("FOO")
+	fmt.Fprintf(os.Stdout, "FOO=%q\n", foo)
+	assert("42", foo)
+
+	not := sh.Getenv("__NOT_THERE__")
+	fmt.Fprintf(os.Stdout, "__NOT_THERE__=%q\n", not)
+	assert("", not)
+
+    err = sh.Source("./test-script.sh")
 	if err != nil {
 		panic(err)
 	}
-	{
-		val := sh.Getenv("TOTO")
-		fmt.Fprintf(os.Stdout, "TOTO=%q\n", val)
-		assert("1012", val)
-	}
-	err = sh.Setenv("TOTO", "1011")
-	if err != nil {
-		panic(err)
-	}
-	{
-		val := sh.Getenv("TATA")
-		fmt.Fprintf(os.Stdout, "TATA=%q\n", val)
-		assert("", val)
-	}
-	{
-		val := sh.Getenv("TOTO")
-		fmt.Fprintf(os.Stdout, "TOTO=%q\n", val)
-		assert("1011", val)
-	}
-	err = sh.Source("./test-script.sh")
-	if err != nil {
-		panic(err)
-	}
-	{
-		val := sh.Getenv("TITI")
-		fmt.Fprintf(os.Stdout, "TITI=%q\n", val)
-	}
-	out, err := sh.Run("/bin/ls", ".")
+
+    out, err := sh.Run("/bin/ls", ".")
 	if err != nil {
 		panic(err)
 	}
