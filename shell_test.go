@@ -59,6 +59,11 @@ func TestChdir(t *testing.T) {
 		t.Fatalf(err.Error())
 	}
 
+	top, err = os.Getwd()
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
 	sh, err := shell.New()
 	if err != nil {
 		t.Fatalf(err.Error())
