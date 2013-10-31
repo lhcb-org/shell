@@ -13,7 +13,7 @@ import (
 //const _GOSH_beg = "__@@GOSH@@__{{"
 //const _GOSH_end = "}}"
 const _GOSH_feed = "echo __@@GOSH@@__{{%d:$?}}"
-const _BUFSZ = 2 << 4
+const _BUFSZ = 2 << 8
 
 var gosh_re = regexp.MustCompile(`(?P<name>(.|\n)*)__@@GOSH@@__{{(\d+?:\d+?)}}`)
 var gosh_re2 = regexp.MustCompile(`^__@@GOSH@@__{{(\d+?:\d+?)}}`)
