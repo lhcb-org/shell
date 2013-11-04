@@ -22,6 +22,13 @@ var sh_debug = false
 
 //var sh_debug = true
 
+func init() {
+	do_debug := os.Getenv("GO_SHELL_DEBUG")
+	if do_debug == "1" {
+		sh_debug = true
+	}
+}
+
 func fprintf(w io.Writer, format string, a ...interface{}) (int, error) {
 	if sh_debug {
 		return fmt.Fprintf(w, format, a...)
