@@ -20,8 +20,6 @@ var gosh_re2 = regexp.MustCompile(`^__@@GOSH@@__{{(\d+?:\d+?)}}`)
 
 var sh_debug = false
 
-//var sh_debug = true
-
 func init() {
 	do_debug := os.Getenv("GO_SHELL_DEBUG")
 	if do_debug == "1" {
