@@ -200,10 +200,10 @@ func (sh *Shell) Getenv(key string) string {
 	return out
 }
 
-func (sh *Shell) Source(script string, args ...string) error {
+func (sh *Shell) Source(script string, args ...string) ([]byte, error) {
 	// fprintf(os.Stderr, ":: source[%q]\n", script)
 	resp := sh.send(fmt.Sprintf(". %s %s", script, strings.Join(args, " ")))
-	return resp.err
+	return resp.buf, resp.err
 }
 
 func (sh *Shell) Run(cmd string, args ...string) ([]byte, error) {

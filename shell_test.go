@@ -143,7 +143,7 @@ export GHI=101
 	}
 	f.Sync()
 
-	err = sh.Source(f.Name())
+	_, err = sh.Source(f.Name())
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
@@ -204,7 +204,7 @@ export BAR="202"
 	}
 	f.Sync()
 
-	err = sh.Source(f.Name())
+	_, err = sh.Source(f.Name())
 	if err.Error() != `error: "101"` {
 		t.Fatalf("expected non-zero status code 101. got: %q\n", err.Error())
 	}
