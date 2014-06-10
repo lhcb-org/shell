@@ -6,7 +6,7 @@ shell
 ## Installation
 
 ```sh
-$ go get github.com/atlas-org/shell
+$ go get github.com/lhcb-org/shell
 ```
 
 ## Example
@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/atlas-org/shell"
+	"github.com/lhcb-org/shell"
 )
 
 func assert(exp, val string) {

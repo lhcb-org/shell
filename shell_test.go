@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/atlas-org/shell"
+	"github.com/lhcb-org/shell"
 )
 
 func TestSetenv(t *testing.T) {
