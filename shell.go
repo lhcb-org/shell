@@ -38,6 +38,7 @@ func gosh_feed(i int) string {
 	return fmt.Sprintf(_GOSH_feed, i)
 }
 
+// Shell holds the context for an interactive shell (/bin/sh)
 type Shell struct {
 	cmd    *exec.Cmd
 	stdin  io.Writer
@@ -61,6 +62,9 @@ func (sh *Shell) id() int {
 	return g_counter
 }
 
+// New returns a new interactive /bin/sh shell.
+// Note that to properly release resources, you have to call
+// the Delete() method once the Shell value is no longer needed.
 func New() (Shell, error) {
 	cmd := exec.Command("/bin/sh")
 	stdin, w := io.Pipe()
@@ -182,12 +186,16 @@ func New() (Shell, error) {
 	return sh, nil
 }
 
+// Setenv sets the value of the environment variable named by the key.
+// It returns an error, if any.
 func (sh *Shell) Setenv(key, value string) error {
 	// fprintf(os.Stderr, ":: env[%q]= %q\n", key, value)
 	resp := sh.send(fmt.Sprintf("export %s=%q", key, value))
 	return resp.err
 }
 
+// Getenv retrieves the value of the environment variable named by the key.
+// It returns the value, which will be empty if the variable is not present.
 func (sh *Shell) Getenv(key string) string {
 	// fprintf(os.Stderr, ":: env[%q]\n", key)
 	resp := sh.send(fmt.Sprintf("echo ${%s}", key))
@@ -200,12 +208,16 @@ func (sh *Shell) Getenv(key string) string {
 	return out
 }
 
+// Source sources the script with optional arguments args.
+// It returns the combined output of stdout and stderr, as well as an error if any.
 func (sh *Shell) Source(script string, args ...string) ([]byte, error) {
 	// fprintf(os.Stderr, ":: source[%q]\n", script)
 	resp := sh.send(fmt.Sprintf(". %s %s", script, strings.Join(args, " ")))
 	return resp.buf, resp.err
 }
 
+// Run runs the command cmd with optional arguments args.
+// It returns the combined output of stdout and stderr, as well as an error if any.
 func (sh *Shell) Run(cmd string, args ...string) ([]byte, error) {
 	shcmd := strings.Join(append([]string{cmd}, args...), " ")
 	resp := sh.send(shcmd)
