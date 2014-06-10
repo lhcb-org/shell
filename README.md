@@ -9,6 +9,10 @@ shell
 $ go get github.com/lhcb-org/shell
 ```
 
+## Documentation
+
+Documentation is available on [godoc](http://godoc.org/github.com/lhcb-org/shell)
+
 ## Example
 
 ```go
